@@ -2,3 +2,6 @@ jsonpath-ng==1.5.3
 redis==4.5.5
 graphviz==0.20.1
 requests==2.32.3
+fastapi==0.115.12
+uvicorn==0.34.0
+cryptography==44.0.2
