@@ -1,6 +1,13 @@
 import subprocess
 import requests
 
+EXECUTION_FLAGS = {
+    "paused": False,
+}
+
+results = {}
+error_info = None
+
 def execute_shell(task):
     command = task['command']
     try:

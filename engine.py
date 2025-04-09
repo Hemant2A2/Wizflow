@@ -69,6 +69,7 @@ class WorkflowEngine:
         for task_id in self.order:
             outputs = self._run_single_task(task_id)
             self.results[task_id] = outputs
+            self.results['status'] = 'completed'
         return self.results
     
     def run_parallel(self, max_workers=4):
@@ -108,7 +109,7 @@ class WorkflowEngine:
                         indegree[child] -= 1
                         if indegree[child] == 0:
                             submit(child)
-
+        self.results['status'] = 'completed'
         return self.results
     
     def export_dag(self, output_path="workflow"):

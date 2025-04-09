@@ -24,6 +24,18 @@ def main():
     try:
         # results = engine.run()
         results = engine.run_parallel(16)
+        
+        if results["status"] == "completed":
+            print(" Workflow completed successfully!")
+        elif results["status"] == "paused":
+            print("⏸  Workflow paused. You can resume later.")
+        elif results["status"] == "stopped":
+            print(" Workflow stopped by user.")
+        elif results["status"] == "failed":
+            print(" Workflow failed.")
+            print(f"Task ID that failed: {results['error']['failed_task']}")
+            print(f"Error message: {results['error']['error']}")
+
         print("Workflow completed successfully. Results:")
         print(json.dumps(results, indent=2))
     except Exception as e:
