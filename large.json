@@ -1,0 +1,24 @@
+{
+    "workflow_name": "large_workflow",
+    "description": "Demonstrate parallel execution on a larger DAG",
+    "version": "1.0",
+    "tasks": [
+      { "id": "t0",  "name": "Task 0",  "type": "SHELL", "command": "mkdir -p workspace", "depends_on": [], "status": "PENDING" },
+      { "id": "t1",  "name": "Task 1",  "type": "SHELL", "command": "echo Running t1 > workspace/t1.txt; sleep 1", "depends_on": ["t0"], "status": "PENDING" },
+      { "id": "t2",  "name": "Task 2",  "type": "SHELL", "command": "echo Running t2 > workspace/t2.txt; sleep 1", "depends_on": ["t1"], "status": "PENDING" },
+      { "id": "t3",  "name": "Task 3",  "type": "SHELL", "command": "echo Running t3 > workspace/t3.txt; sleep 1", "depends_on": ["t1"], "status": "PENDING" },
+      { "id": "t4",  "name": "Task 4",  "type": "SHELL", "command": "echo Running t4 > workspace/t4.txt; sleep 1", "depends_on": ["t1"], "status": "PENDING" },
+      { "id": "t5",  "name": "Task 5",  "type": "SHELL", "command": "echo Running t5 > workspace/t5.txt; sleep 1", "depends_on": ["t2","t3"], "status": "PENDING" },
+      { "id": "t6",  "name": "Task 6",  "type": "SHELL", "command": "echo Running t6 > workspace/t6.txt; sleep 1", "depends_on": ["t3"], "status": "PENDING" },
+      { "id": "t7",  "name": "Task 7",  "type": "SHELL", "command": "echo Running t7 > workspace/t7.txt; sleep 1", "depends_on": ["t4"], "status": "PENDING" },
+      { "id": "t8",  "name": "Task 8",  "type": "SHELL", "command": "echo Running t8 > workspace/t8.txt; sleep 1", "depends_on": ["t5","t6"], "status": "PENDING" },
+      { "id": "t9",  "name": "Task 9",  "type": "SHELL", "command": "echo Running t9 > workspace/t9.txt; sleep 1", "depends_on": ["t7"], "status": "PENDING" },
+      { "id": "t10", "name": "Task 10", "type": "SHELL", "command": "echo Running t10 > workspace/t10.txt; sleep 1", "depends_on": ["t8","t9"], "status": "PENDING" },
+      { "id": "t11", "name": "Task 11", "type": "SHELL", "command": "echo Running t11 > workspace/t11.txt; sleep 1", "depends_on": ["t0"], "status": "PENDING" },
+      { "id": "t12", "name": "Task 12", "type": "SHELL", "command": "echo Running t12 > workspace/t12.txt; sleep 1", "depends_on": ["t0"], "status": "PENDING" },
+      { "id": "t13", "name": "Task 13", "type": "SHELL", "command": "echo Running t13 > workspace/t13.txt; sleep 1", "depends_on": ["t11"], "status": "PENDING" },
+      { "id": "t14", "name": "Task 14", "type": "SHELL", "command": "echo Running t14 > workspace/t14.txt; sleep 1", "depends_on": ["t12"], "status": "PENDING" },
+      { "id": "t15", "name": "Task 15", "type": "SHELL", "command": "echo Running t15 > workspace/t15.txt; sleep 1", "depends_on": ["t13","t14"], "status": "PENDING" }
+    ]
+  }
+  

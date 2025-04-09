@@ -74,9 +74,7 @@ def extract_outputs(task, raw_output):
             matches = [m.value for m in expr.find(raw_output)]
             outputs[name] = matches[0] if matches else None
         elif typ == "file":
-            path = spec["path"]
-            with open(path, "r") as f:
-                outputs[name] = f.read().strip()
+            outputs[name] = spec["path"]
         else:
             outputs[name] = raw_output
     return outputs

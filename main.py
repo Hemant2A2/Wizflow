@@ -20,9 +20,10 @@ def main():
     filepath = sys.argv[1]
     workflow_json = load_workflow_from_file(filepath)
     engine = WorkflowEngine(workflow_json)
-    engine.export_dag("sample_workflow_dag")
+    engine.export_dag("large_workflow_dag")
     try:
-        results = engine.run()
+        # results = engine.run()
+        results = engine.run_parallel(16)
         print("Workflow completed successfully. Results:")
         print(json.dumps(results, indent=2))
     except Exception as e:

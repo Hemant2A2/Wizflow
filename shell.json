@@ -1,0 +1,65 @@
+{
+    "workflow_name": "shell_workflow",
+    "description": "A pure shell command workflow example",
+    "version": "1.0",
+    "tasks": [
+      {
+        "id": "init",
+        "name": "Initialize Workspace",
+        "type": "SHELL",
+        "command": "mkdir -p workspace",
+        "outputs": {},
+        "depends_on": [],
+        "status": "PENDING"
+      },
+      {
+        "id": "gen_file",
+        "name": "Generate Data File",
+        "type": "SHELL",
+        "command": "echo 'sample data line 1\nsample data line 2\nsample data line 3' > workspace/data.txt",
+        "outputs": {
+          "data_file": {
+            "type": "file",
+            "path": "workspace/data.txt"
+          }
+        },
+        "depends_on": ["init"],
+        "status": "PENDING"
+      },
+      {
+        "id": "count_lines",
+        "name": "Count Lines in Data File",
+        "type": "SHELL",
+        "command": "wc -l {{data_file}} | awk '{print $1}' > workspace/line_count.txt",
+        "input_mappings": {
+          "data_file": {
+            "from_task": "gen_file",
+            "output": "data_file"
+          }
+        },
+        "outputs": {
+          "line_count": {
+            "type": "file",
+            "path": "workspace/line_count.txt"
+          }
+        },
+        "depends_on": ["gen_file"],
+        "status": "PENDING"
+      },
+      {
+        "id": "archive",
+        "name": "Archive Workspace",
+        "type": "SHELL",
+        "command": "tar -czf workspace.tar.gz -C workspace .",
+        "outputs": {
+          "archive_file": {
+            "type": "file",
+            "path": "workspace.tar.gz"
+          }
+        },
+        "depends_on": ["count_lines"],
+        "status": "PENDING"
+      }
+    ]
+  }
+  
