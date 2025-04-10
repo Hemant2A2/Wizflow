@@ -35,8 +35,8 @@ class WorkflowEngine:
         self._check_paused()
         set_task_status(self.wf_key, task_id, "RUNNING")
         raw = self.nodes[task_id]
-        cfg_hash = compute_hash(task)
         task = resolve_input_mappings(raw, self.results)
+        cfg_hash = compute_hash(task)
         cached = load_task_cache(self.wf_key, task_id)
         if task_id not in self.reexec and cached and cached[1] == cfg_hash:
             set_task_status(self.wf_key, task_id, "COMPLETED")
