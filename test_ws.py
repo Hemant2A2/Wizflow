@@ -4,7 +4,7 @@ import websockets
 async def test():
     uri = "ws://localhost:8000/ws"
     async with websockets.connect(uri) as ws:
-        with open("shell.json") as f:
+        with open("large.json") as f:
             wf = json.load(f)
         await ws.send(json.dumps({"type":"start","workflow":wf}))
         print("Sent start, awaiting events…")

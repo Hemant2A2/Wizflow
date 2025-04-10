@@ -1,12 +1,15 @@
 import json
 import asyncio
+import logging
 from threading import Thread
+import os
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from redis.asyncio import Redis
 
 from engine import WorkflowEngine
+from logging_config import setup_logging
 
 app = FastAPI(
     title="WizFlow Ws API",
@@ -28,6 +31,11 @@ engines: dict[str, WorkflowEngine] = {}
 @app.on_event("startup")
 async def startup_event():
     global redis_client
+    log_file = "logs/workflow.log"
+    if os.path.exists(log_file):
+        open(log_file, "w").close()
+    setup_logging(log_file="logs/workflow.log")
+    logging.getLogger("uvicorn").info("Logging initialized, writing to logs/workflow.log")
     redis_client = Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
 @app.websocket("/ws")
@@ -57,6 +65,7 @@ async def workflow_ws(websocket: WebSocket):
                 if typ == "start":
                     wf_json = msg["workflow"]
                     engine = WorkflowEngine(wf_json)
+                    engine.export_dag()
                     wf_id = engine.wf_key
                     engines[wf_id] = engine
 

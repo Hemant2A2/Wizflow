@@ -19,6 +19,9 @@ from store import (
     set_workflow_status,
     get_workflow_status,
 )
+import logging
+logger = logging.getLogger(__name__)
+
 
 class WorkflowEngine:
     def __init__(self, workflow_json):
@@ -42,7 +45,7 @@ class WorkflowEngine:
         cached = load_task_cache(self.wf_key, task_id)
         if task_id not in self.reexec and cached and cached[1] == cfg_hash:
             set_task_status(self.wf_key, task_id, "COMPLETED")
-            print(f"Using cached result for task {task_id}")
+            logger.debug(f"Using cached result for task {task_id}")
             return cached[0]
         try:
             raw_output = execute_task(task)
@@ -179,5 +182,4 @@ class WorkflowEngine:
             filename=output_path,
             engine_name=self.name
         )
-        print(f"DAG exported to {png_path}")
         return png_path
