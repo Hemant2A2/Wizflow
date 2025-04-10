@@ -1,38 +1,12 @@
-// large_workflow
+// Hello World
 digraph {
-	t0 [label=t0]
-	t1 [label=t1]
-	t2 [label=t2]
-	t3 [label=t3]
-	t4 [label=t4]
-	t5 [label=t5]
-	t6 [label=t6]
-	t7 [label=t7]
-	t8 [label=t8]
-	t9 [label=t9]
-	t10 [label=t10]
-	t11 [label=t11]
-	t12 [label=t12]
-	t13 [label=t13]
-	t14 [label=t14]
-	t15 [label=t15]
-	t0 -> t1
-	t0 -> t11
-	t0 -> t12
-	t1 -> t2
-	t1 -> t3
-	t1 -> t4
-	t2 -> t5
-	t3 -> t5
-	t3 -> t6
-	t4 -> t7
-	t5 -> t8
-	t6 -> t8
-	t7 -> t9
-	t8 -> t10
-	t9 -> t10
-	t11 -> t13
-	t12 -> t14
-	t13 -> t15
-	t14 -> t15
+	"shell_bff57c14-3727-4d91-b145-392376783a8b" [label="shell_bff57c14-3727-4d91-b145-392376783a8b"]
+	"shell_6c40c11f-d27b-4cbb-a245-8bd3d5a9b84a" [label="shell_6c40c11f-d27b-4cbb-a245-8bd3d5a9b84a"]
+	"shell_458e98e1-b538-4079-b3a9-cad288855fd5" [label="shell_458e98e1-b538-4079-b3a9-cad288855fd5"]
+	"shell_6088c124-4371-4c3d-bfb4-11d2ed974b17" [label="shell_6088c124-4371-4c3d-bfb4-11d2ed974b17"]
+	"shell_d3a6eb84-1ad6-4e03-a941-1f844c5dc256" [label="shell_d3a6eb84-1ad6-4e03-a941-1f844c5dc256"]
+	"shell_bff57c14-3727-4d91-b145-392376783a8b" -> "shell_6c40c11f-d27b-4cbb-a245-8bd3d5a9b84a"
+	"shell_bff57c14-3727-4d91-b145-392376783a8b" -> "shell_458e98e1-b538-4079-b3a9-cad288855fd5"
+	"shell_458e98e1-b538-4079-b3a9-cad288855fd5" -> "shell_6088c124-4371-4c3d-bfb4-11d2ed974b17"
+	"shell_458e98e1-b538-4079-b3a9-cad288855fd5" -> "shell_d3a6eb84-1ad6-4e03-a941-1f844c5dc256"
 }

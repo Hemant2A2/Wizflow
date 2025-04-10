@@ -6,3 +6,4 @@ fastapi==0.115.12
 uvicorn==0.34.0
 cryptography==44.0.2
 websockets==15.0.1
+dotenv==0.9.9

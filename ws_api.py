@@ -62,8 +62,9 @@ async def workflow_ws(websocket: WebSocket):
                 typ = msg.get("type")
 
                 # start workflow
-                if typ == "start":
-                    wf_json = msg["workflow"]
+                if typ == "START":
+                    wf_str = msg["workflow"]
+                    wf_json = json.loads(wf_str)
                     engine = WorkflowEngine(wf_json)
                     engine.export_dag()
                     wf_id = engine.wf_key

@@ -1,0 +1,8 @@
+2025-04-10 20:13:37,998 DEBUG graphviz.saving [MainThread] write lines to 'workflow'
+2025-04-10 20:13:38,001 DEBUG graphviz.saving [MainThread] write lines to 'workflow'
+2025-04-10 20:13:38,002 DEBUG graphviz.backend.execute [MainThread] run [PosixPath('dot'), '-Kdot', '-Tpng', '-O', 'workflow']
+2025-04-10 20:13:38,268 DEBUG engine [ThreadPoolExecutor-0_0] Using cached result for task shell_bff57c14-3727-4d91-b145-392376783a8b
+2025-04-10 20:13:38,270 DEBUG engine [ThreadPoolExecutor-0_1] Using cached result for task shell_6c40c11f-d27b-4cbb-a245-8bd3d5a9b84a
+2025-04-10 20:13:38,270 DEBUG engine [ThreadPoolExecutor-0_0] Using cached result for task shell_458e98e1-b538-4079-b3a9-cad288855fd5
+2025-04-10 20:13:38,271 DEBUG engine [ThreadPoolExecutor-0_1] Using cached result for task shell_6088c124-4371-4c3d-bfb4-11d2ed974b17
+2025-04-10 20:13:38,271 DEBUG engine [ThreadPoolExecutor-0_0] Using cached result for task shell_d3a6eb84-1ad6-4e03-a941-1f844c5dc256

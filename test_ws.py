@@ -6,7 +6,7 @@ async def test():
     async with websockets.connect(uri) as ws:
         with open("large.json") as f:
             wf = json.load(f)
-        await ws.send(json.dumps({"type":"start","workflow":wf}))
+        await ws.send(json.dumps({"type":"START","workflow":wf}))
         print("Sent start, awaiting events…")
 
         for _ in range(2):

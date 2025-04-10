@@ -14,13 +14,13 @@ def init_workflow(wf_id, task_ids):
     r.set(f"wf:{wf_id}:status", "PENDING")
     publish_event(wf_id, {"type": "workflow_update", "status": "PENDING"})
     for tid in task_ids:
-        publish_event(wf_id, {"type": "task_update", "task_id": tid, "status": "PENDING"})
+        publish_event(wf_id, {"type": "NODE_UPDATE", "task_id": tid, "status": "PENDING"})
 
 def set_task_status(wf_id, task_id, status):
     r.hset(f"wf:{wf_id}:tasks", task_id, status)
     publish_event(wf_id, {
-        "type": "task_update",
-        "task_id": task_id,
+        "type": "NODE_UPDATE",
+        "nodeId": task_id,
         "status": status
     })
 
