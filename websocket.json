@@ -1,0 +1,35 @@
+{
+  "workflow_name": "New Workflow",
+  "description": "",
+  "version": "1.0",
+  "tasks": [
+    {
+      "id": "email_ab2bd94e-4dca-40bd-a36e-2011b27c04be",
+      "name": "Email Task",
+      "type": "EMAIL",
+      "status": "PENDING",
+      "loading": false,
+      "breakpoint": false,
+      "depends_on": [],
+      "position": {
+        "x": 178.85190928967108,
+        "y": 213.39720852198673
+      }
+    },
+    {
+      "id": "restapi_82d722ab-0c54-43db-8384-18b7d19437ff",
+      "name": "Restapi Task",
+      "type": "RESTAPI",
+      "status": "PENDING",
+      "loading": false,
+      "breakpoint": false,
+      "depends_on": [
+        "email_ab2bd94e-4dca-40bd-a36e-2011b27c04be"
+      ],
+      "position": {
+        "x": 303.54685005343424,
+        "y": 336.04973814010515
+      }
+    }
+  ]
+}

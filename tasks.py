@@ -1,5 +1,10 @@
 import subprocess
 import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+import os
 
 EXECUTION_FLAGS = {
     "paused": False,
@@ -29,11 +34,40 @@ def execute_rest(task):
     except requests.RequestException as e:
         raise Exception(f"REST task failed: {str(e)}")
 
+def execute_email(task):
+    load_dotenv()
+    sender_email = os.getenv("SENDER_EMAIL")
+    password = os.getenv("APP_PASSWORD") 
+
+    subject = task['subject']
+    body = task['body']
+
+    for recipient in task['recipients']:
+        receiver_email = recipient
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = subject
+
+        msg.attach(MIMEText(body, 'plain'))
+
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(sender_email, password)
+                server.sendmail(sender_email, receiver_email, msg.as_string())
+            print("Email sent successfully!")
+        except Exception as e:
+            print(f"Error sending email: {e}")
+
+    raise NotImplementedError("Email task execution is not implemented yet.")
+
 def execute_task(task):
     task_type = task['type']
     if task_type == "SHELL":
         return execute_shell(task)
     elif task_type == "RESTAPI":
         return execute_rest(task)
+    elif task_type == "EMAIL":
+        return execute_email(task)
     else:
         raise ValueError(f"Unsupported task type: {task_type}")
