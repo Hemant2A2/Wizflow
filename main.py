@@ -20,21 +20,10 @@ def main():
     filepath = sys.argv[1]
     workflow_json = load_workflow_from_file(filepath)
     engine = WorkflowEngine(workflow_json)
-    engine.export_dag("large_workflow_dag")
+    engine.export_dag("test_workflow_dag")
     try:
-        # results = engine.run()
-        results = engine.run_parallel(16)
-        
-        if results["status"] == "completed":
-            print(" Workflow completed successfully!")
-        elif results["status"] == "paused":
-            print("⏸  Workflow paused. You can resume later.")
-        elif results["status"] == "stopped":
-            print(" Workflow stopped by user.")
-        elif results["status"] == "failed":
-            print(" Workflow failed.")
-            print(f"Task ID that failed: {results['error']['failed_task']}")
-            print(f"Error message: {results['error']['error']}")
+        results = engine.run()
+        # results = engine.run_parallel(16)
 
         print("Workflow completed successfully. Results:")
         print(json.dumps(results, indent=2))

@@ -10,6 +10,7 @@ def compute_hash(obj):
 
 def build_dag(tasks):
     dag = defaultdict(list)
+    dag = { t["id"]: [] for t in tasks }
     indegree = {}
     nodes = {}
 
@@ -79,9 +80,9 @@ def extract_outputs(task, raw_output):
             outputs[name] = raw_output
     return outputs
 
-def dag_to_dot(dag, filename="workflow.dot", engine_name=None):
+def dag_to_dot(dag, all_nodes, filename="workflow.dot", engine_name=None):
     dot = Digraph(comment=engine_name or "Workflow DAG", format="png")
-    for node in dag:
+    for node in all_nodes:
         dot.node(node, node)
     for parent, children in dag.items():
         for child in children:
