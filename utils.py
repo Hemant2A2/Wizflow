@@ -90,3 +90,22 @@ def dag_to_dot(dag, all_nodes, filename="workflow.dot", engine_name=None):
     dot.save(filename)
     dot.render(filename, view=False)
     return filename + ".png"
+
+def compute_max_threads(dag, indegree):
+    from collections import deque
+    indeg = indegree.copy()
+    frontier = deque([n for n, d in indeg.items() if d == 0])
+    max_width = len(frontier)
+
+    while frontier:
+        next_frontier = []
+        while frontier:
+            node = frontier.popleft()
+            for child in dag.get(node, []):
+                indeg[child] -= 1
+                if indeg[child] == 0:
+                    next_frontier.append(child)
+        frontier = deque(next_frontier)
+        max_width = max(max_width, len(frontier))
+    return max_width
+

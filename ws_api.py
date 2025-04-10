@@ -63,7 +63,11 @@ async def workflow_ws(websocket: WebSocket):
                     pubsub = redis_client.pubsub()
                     await pubsub.subscribe(f"wf:{wf_id}:events")
 
-                    Thread(target=engine.run_parallel, daemon=True).start()
+                    max_workers = engine.estimate_max_workers()
+                    Thread(
+                        target=lambda: engine.run_parallel(max_workers=max_workers),
+                        daemon=True
+                    ).start()
 
                     await websocket.send_json({
                         "type": "workflow_started",
@@ -86,7 +90,11 @@ async def workflow_ws(websocket: WebSocket):
                         else:
                             from_task = msg.get("from_task")
                             engine.restart(from_task)
-                            Thread(target=engine.run_parallel, daemon=True).start()
+                            max_workers = engine.estimate_max_workers()
+                            Thread(
+                                target=lambda: engine.run_parallel(max_workers=max_workers),
+                                daemon=True
+                            ).start()
 
                         await websocket.send_json({
                             "type": f"{typ}_ack",

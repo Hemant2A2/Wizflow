@@ -1,4 +1,5 @@
 import time
+import os
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from utils import (
@@ -7,6 +8,7 @@ from utils import (
     topological_sort,
     resolve_input_mappings,
     extract_outputs,
+    compute_max_threads,
     dag_to_dot,
 )
 from tasks import execute_task
@@ -24,8 +26,8 @@ class WorkflowEngine:
         self.version = workflow_json.get("version", "v1")
         self.tasks   = workflow_json["tasks"]
 
-        self.dag, indegree, self.nodes = build_dag(self.tasks)
-        self.order = topological_sort(self.dag, indegree.copy())
+        self.dag, self.indegree, self.nodes = build_dag(self.tasks)
+        self.order = topological_sort(self.dag, self.indegree.copy())
         self.results = {}
         self.wf_key = f"{self.name}:{self.version}"
         init_workflow(self.wf_key, list(self.nodes.keys()))
@@ -164,6 +166,11 @@ class WorkflowEngine:
                     queue.append(child)
 
         set_workflow_status(self.wf_key, "PENDING")
+
+    def estimate_max_workers(self):
+        width = compute_max_threads(self.dag, self.indegree.copy())
+        cpu = os.cpu_count() or 1
+        return min(width, cpu * 5)
     
     def export_dag(self, output_path="workflow"):
         png_path = dag_to_dot(
