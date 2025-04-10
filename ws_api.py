@@ -63,8 +63,11 @@ async def workflow_ws(websocket: WebSocket):
 
                 # start workflow
                 if typ == "START":
-                    wf_str = msg["workflow"]
-                    wf_json = json.loads(wf_str)
+                    # logging.getLogger("uvicorn").info(msg)
+                    wf_data = msg["workflow"]
+                    wf_json = wf_data
+                    if isinstance(wf_data, str):
+                        wf_json = json.loads(wf_data)
                     engine = WorkflowEngine(wf_json)
                     engine.export_dag()
                     wf_id = engine.wf_key
@@ -85,7 +88,7 @@ async def workflow_ws(websocket: WebSocket):
                     })
 
                 # pause/resume/restart
-                elif typ in ("pause", "resume", "restart"):
+                elif typ in ("PAUSE", "RESUME", "RESTART"):
                     if not wf_id or wf_id not in engines:
                         await websocket.send_json({
                             "type": "error",
@@ -93,11 +96,11 @@ async def workflow_ws(websocket: WebSocket):
                         })
                     else:
                         engine = engines[wf_id]
-                        if typ == "pause":
+                        if typ == "PAUSE":
                             engine.pause()
-                        elif typ == "resume":
+                        elif typ == "RESUME":
                             engine.resume()
-                        else:
+                        elif typ == "RESTART":
                             from_task = msg.get("from_task")
                             engine.restart(from_task)
                             max_workers = engine.estimate_max_workers()
@@ -119,6 +122,22 @@ async def workflow_ws(websocket: WebSocket):
                 if event and event.get("data"):
                     payload = event["data"]
                     await websocket.send_text(payload)
+                    try:
+                        data = json.loads(payload)
+                    except json.JSONDecodeError:
+                        data = {}
+                    if data.get("type") == "workflow_update" and data.get("status") == "COMPLETED":
+                        engine = engines.get(wf_id)
+                        if engine:
+                            leaf_tasks = [tid for tid, children in engine.dag.items() if not children]
+                            final_outputs = {
+                                tid: engine.results.get(tid)
+                                for tid in leaf_tasks
+                            }
+                            await websocket.send_json({
+                                "type": "workflow_output",
+                                "outputs": final_outputs
+                            })
                 ws_task.cancel()
 
             for task in pending:

@@ -28,6 +28,8 @@ class WorkflowEngine:
         self.name    = workflow_json.get("workflow_name", "workflow")
         self.version = workflow_json.get("version", "v1")
         self.tasks   = workflow_json["tasks"]
+        self.base_dir = os.path.abspath(os.path.join("runs", self.name + "_" + self.version))
+        os.makedirs(self.base_dir, exist_ok=True)
 
         self.dag, self.indegree, self.nodes = build_dag(self.tasks)
         self.order = topological_sort(self.dag, self.indegree.copy())
@@ -51,7 +53,7 @@ class WorkflowEngine:
             logger.debug(f"Using cached result for task {task_id}")
             return cached[0]
         try:
-            raw_output = execute_task(task)
+            raw_output = execute_task(task, cwd=self.base_dir)
             outputs = extract_outputs(task, raw_output)
             save_task_cache(self.wf_key, task_id, outputs, cfg_hash)
             set_task_status(self.wf_key, task_id, "COMPLETED")
@@ -66,14 +68,23 @@ class WorkflowEngine:
         Run the workflow without multi threading.
         """
         set_workflow_status(self.wf_key, "RUNNING")
+        blocked = set()
+        any_failed = False
+
         for task_id in self.order:
+            if task_id in blocked:
+                set_task_status(self.wf_key, task_id, "PENDING")
+                logger.info(f"Task {task_id} blocked (ancestor failed)")
+                continue
             self._check_paused()
-            outputs = self._run_single_task(task_id)
-            self.results[task_id] = outputs
-            if get_workflow_status(self.wf_key) == "FAILED":
-                break
-        if get_workflow_status(self.wf_key) != "FAILED":
-            set_workflow_status(self.wf_key, "COMPLETED")
+            try:
+                outputs = self._run_single_task(task_id)
+                self.results[task_id] = outputs
+            except Exception:
+                any_failed = True
+                blocked |= self._get_descendants(task_id)
+        final_status = "FAILED" if any_failed else "COMPLETED"
+        set_workflow_status(self.wf_key, final_status)
         return self.results
     
     def run_parallel(self, max_workers=4):
@@ -86,6 +97,8 @@ class WorkflowEngine:
             for child in children:
                 indegree[child] += 1
 
+        blocked = set()
+        any_failed = False
         ready = deque([tid for tid, deg in indegree.items() if deg == 0])
         self.results = {}
 
@@ -93,8 +106,12 @@ class WorkflowEngine:
             future_to_tid = {}
 
             def submit(tid):
-                fut = pool.submit(self._run_single_task, tid)
-                future_to_tid[fut] = tid
+                if tid in blocked:
+                    set_task_status(self.wf_key, tid, "PENDING")
+                    logger.info(f"Task {tid} blocked (ancestor failed)")
+                else:
+                    fut = pool.submit(self._run_single_task, tid)
+                    future_to_tid[fut] = tid
 
             for tid in ready:
                 submit(tid)
@@ -106,16 +123,17 @@ class WorkflowEngine:
                     tid = future_to_tid.pop(fut)
                     try:
                         outputs = fut.result()
+                        self.results[tid] = outputs
                     except Exception as e:
-                        raise RuntimeError(f"Task {tid} failed: {e}")
-                    self.results[tid] = outputs
+                        any_failed = True
+                        blocked |= self._get_descendants(tid)
 
                     for child in self.dag.get(tid, []):
                         indegree[child] -= 1
                         if indegree[child] == 0:
                             submit(child)
-        if get_workflow_status(self.wf_key) != "FAILED":
-            set_workflow_status(self.wf_key, "COMPLETED")
+        final_status = "FAILED" if any_failed else "COMPLETED"
+        set_workflow_status(self.wf_key, final_status)
         return self.results
     
     def _tasks_to_rexecute(self):
@@ -127,22 +145,22 @@ class WorkflowEngine:
             if new_hash != old_hash:
                 reexec.add(tid)
 
-        def collect_descendants(start):
-            stack = [start]
-            seen = set()
-            while stack:
-                node = stack.pop()
-                for child in self.dag.get(node, []):
-                    if child not in seen:
-                        seen.add(child)
-                        stack.append(child)
-            return seen
-
         all_reexec = set(reexec)        
         for tid in list(reexec):
-            all_reexec |= collect_descendants(tid)
+            all_reexec |= self._get_descendants(tid)
 
         self.reexec = all_reexec
+
+    def _get_descendants(self, task_id):
+        seen = set()
+        stack = [task_id]
+        while stack:
+            node = stack.pop()
+            for child in self.dag.get(node, []):
+                if child not in seen:
+                    seen.add(child)
+                    stack.append(child)
+        return seen
     
     def _check_paused(self):
         if get_workflow_status(self.wf_key) == "PAUSED":

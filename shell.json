@@ -31,12 +31,6 @@
         "name": "Count Lines in Data File",
         "type": "SHELL",
         "command": "wc -l {{data_file}} | awk '{print $1}' > workspace/line_count.txt",
-        "input_mappings": {
-          "data_file": {
-            "from_task": "gen_file",
-            "output": "data_file"
-          }
-        },
         "outputs": {
           "line_count": {
             "type": "file",

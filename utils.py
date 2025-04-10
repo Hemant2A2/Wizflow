@@ -46,23 +46,25 @@ def topological_sort(dag, indegree):
 def resolve_input_mappings(task, results):
     import copy
     t = copy.deepcopy(task)
-    for var, mapping in t.get("input_mappings", {}).items():
-        parent = mapping["from_task"]
-        output_key = mapping["output"]
-        if parent not in results or output_key not in results[parent]:
-            raise KeyError(f"Missing output '{output_key}' from task '{parent}'")
-        value = results[parent][output_key]
+    context = {}
+    for parent in t.get("depends_on", []):
+        parent_outs = results.get(parent, {})
+        for key, val in parent_outs.items():
+            if key in context:
+                pass
+            context[key] = val
+    for var, val in context.items():
         placeholder = f"{{{{{var}}}}}"
         for field in ("command", "url"):
             if field in t and isinstance(t[field], str):
-                t[field] = t[field].replace(placeholder, str(value))
+                t[field] = t[field].replace(placeholder, str(val))
         if "headers" in t:
-            for k,v in t["headers"].items():
+            for k, v in t["headers"].items():
                 if isinstance(v, str):
-                    t["headers"][k] = v.replace(placeholder, str(value))
+                    t["headers"][k] = v.replace(placeholder, str(val))
         if "body" in t:
             body_str = json.dumps(t["body"])
-            body_str = body_str.replace(placeholder, str(value))
+            body_str = body_str.replace(placeholder, str(val))
             t["body"] = json.loads(body_str)
     return t
 

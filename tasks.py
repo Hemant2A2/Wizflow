@@ -5,6 +5,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 EXECUTION_FLAGS = {
     "paused": False,
@@ -13,26 +15,36 @@ EXECUTION_FLAGS = {
 results = {}
 error_info = None
 
-def execute_shell(task):
+def execute_shell(task, cwd = None):
     command = task['command']
+    run_dir = cwd or None
     try:
         result = subprocess.run(command, shell=True, check=True,
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, cwd=run_dir)
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         raise Exception(f"Shell task failed: {e.stderr.strip()}")
 
-def execute_rest(task):
-    method = task['method'].upper()
-    url = task['url']
-    headers = task.get('headers', {})
-    body = task.get('body', {})
+def execute_rest(task, cwd=None):
+    method  = task["method"].upper()
+    url     = task["url"]
+    headers = task.get("headers", {})
+    body    = task.get("body", None)
+
+    resp = requests.request(method, url, headers=headers, json=body)
+    resp.raise_for_status()
+
+    run_dir = cwd or os.getcwd()
+    for name, spec in task.get("outputs", {}).items():
+        if spec.get("type") == "json":
+            path = os.path.join(run_dir, spec["json_path"])
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(resp.text)
     try:
-        response = requests.request(method, url, headers=headers, json=body)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        raise Exception(f"REST task failed: {str(e)}")
+        return resp.json()
+    except ValueError:
+        return resp.text
 
 def execute_email(task):
     load_dotenv()
@@ -40,7 +52,7 @@ def execute_email(task):
     password = os.getenv("APP_PASSWORD") 
 
     subject = task['subject']
-    body = task['body']
+    body = task['emailBody']
 
     for recipient in task['recipients']:
         receiver_email = recipient
@@ -55,18 +67,18 @@ def execute_email(task):
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                 server.login(sender_email, password)
                 server.sendmail(sender_email, receiver_email, msg.as_string())
-            print("Email sent successfully!")
+            return "Email sent successfully!"
         except Exception as e:
-            print(f"Error sending email: {e}")
+            logger.debug(f"Error sending email: {e}")
 
     raise NotImplementedError("Email task execution is not implemented yet.")
 
-def execute_task(task):
+def execute_task(task, cwd=None):
     task_type = task['type']
     if task_type == "SHELL":
-        return execute_shell(task)
+        return execute_shell(task, cwd)
     elif task_type == "RESTAPI":
-        return execute_rest(task)
+        return execute_rest(task, cwd)
     elif task_type == "EMAIL":
         return execute_email(task)
     else:

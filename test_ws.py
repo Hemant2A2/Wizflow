@@ -4,7 +4,7 @@ import websockets
 async def test():
     uri = "ws://localhost:8000/ws"
     async with websockets.connect(uri) as ws:
-        with open("large.json") as f:
+        with open("shell.json") as f:
             wf = json.load(f)
         await ws.send(json.dumps({"type":"START","workflow":wf}))
         print("Sent start, awaiting events…")
@@ -14,10 +14,10 @@ async def test():
             msg = await ws.recv()
             print("←", msg)
 
-        await ws.send(json.dumps({"type":"pause"}))
+        await ws.send(json.dumps({"type":"PAUSE"}))
         # print("Sent pause")
 
-        await ws.send(json.dumps({"type":"resume"}))
+        await ws.send(json.dumps({"type":"RESUME"}))
         # print("Sent resume")
 
         # print("←", await ws.recv())

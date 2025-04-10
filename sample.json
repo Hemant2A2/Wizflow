@@ -58,17 +58,11 @@
         "name": "Check Status",
         "type": "RESTAPI",
         "method": "GET",
-        "url": "https://api.example.com/status/{{generated_id}}",
-        "input_mappings": {
-          "generated_id": { "from_task": "step1", "output": "generated_id" }
-        },
-        "headers": {
-          "Authorization": "Bearer YOUR_TOKEN"
-        },
+        "url": "https://api.example.com/",
         "outputs": {
           "status": {
             "type": "json",
-            "json_path": "$.status"
+            "json_path": "response.json"
           }
         },
         "depends_on": ["step1"],
