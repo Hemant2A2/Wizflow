@@ -36,6 +36,9 @@ class WorkflowEngine:
         init_workflow(self.wf_key, list(self.nodes.keys()))
         self._tasks_to_rexecute()
 
+    def get_workflow_id(self):
+        return self.wf_key
+
     def _run_single_task(self, task_id):
         self._check_paused()
         set_task_status(self.wf_key, task_id, "RUNNING")

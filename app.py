@@ -1,10 +1,18 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+# from engine import WorkFlow, WorkFlowEngine
+import os
 import json
 
 class WizFlowBlueprint(BaseModel):
     blueprint: str
+
+class CreateDirectory(BaseModel):
+    workflowID: str
+    userID: str
+
 
 app = FastAPI(
     title="WizFlow API",
@@ -29,18 +37,42 @@ async def read_root():
         "status": "Running",
     }
 
-@app.post("/api/v1/execute")
-async def execute_task(payload: WizFlowBlueprint):  
-    try:
-        blueprint = json.loads(payload.blueprint)
-        print(f"Received blueprint: {blueprint}")
-        with open(f"{blueprint['workflow_name']}.json", "w") as f:
-            json.dump(blueprint, f)
+@app.post("/api/v1/directory")
+async def create_directory(directory: CreateDirectory):
+    base_dir = "uploads"
+    user_dir = os.path.join(base_dir, directory.userID)
+    workflow_dir = os.path.join(user_dir, directory.workflowID)
+    
+    os.makedirs(workflow_dir, exist_ok=True)
 
-        return {
-            "status": "success",
-            "message": "Task executed successfully",
-            "status_code": 200,
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return JSONResponse({
+        "message": "Directory created successfully",
+        "status_code": 200
+    })
+
+@app.post("/api/v1/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    workflowID: str = Form(...),
+    userID: str = Form(...)
+):
+    contents = await file.read()
+
+    base_dir = "uploads"
+    user_dir = os.path.join(base_dir, userID)
+    workflow_dir = os.path.join(user_dir, workflowID)
+    
+    os.makedirs(workflow_dir, exist_ok=True)
+    
+    file_path = os.path.join(workflow_dir, file.filename)
+
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    return JSONResponse({
+        "filename": file.filename,
+        "saved_path": file_path,
+        "content_type": file.content_type,
+        "message": "File uploaded successfully",
+        "status_code": 200
+    })
