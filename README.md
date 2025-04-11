@@ -6,6 +6,6 @@
 
 ## Running the websocket server:
 
-1) Run `uvicorn ws_api:app --reload` to start the server.
+1) Run `uvicorn ws_api:app --reload --host 0.0.0.0 --port 8000` to start the server.
 2) Enter `tail -F logs/workflow.log` on a separte terminal ( the logs will appear here )
 3) Run `python test_ws.py` again on a separte terminal to test any json file.
