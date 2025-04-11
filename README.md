@@ -157,7 +157,3 @@ MIT License
 ---
 
 ### 🔧 Built with Python & ❤️ for Nutanix Hackathon 2025
-
----
-
-Let me know if you'd like a table format for all the dependencies too — or a badge section at the top (e.g., build, Python version, license).
