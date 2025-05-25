@@ -155,5 +155,3 @@ This sends a test JSON payload over WebSocket.
 MIT License
 
 ---
-
-### 🔧 Built with Python & ❤️ for Nutanix Hackathon 2025
